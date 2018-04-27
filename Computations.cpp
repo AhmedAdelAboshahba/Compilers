@@ -6,7 +6,7 @@
 #include <vector>
 #include <stack>
 #include <set>
-#include "Grammar.cpp"
+
 using namespace std;
 
 
@@ -25,10 +25,12 @@ class Computations{
 private:
 	map<string , vector<vector< Grammar* > > > productions;
 	map<string , NonTerminal*> pool;
+	NonTerminal* startState; 
 public:
-	Computations(map<string , vector<vector< Grammar*> > > pro , map<string , NonTerminal*> p){
+	Computations(map<string , vector<vector< Grammar*> > > pro , map<string , NonTerminal*> p , NonTerminal* start ){
 		productions = pro;
 		pool =p;
+		startState =	start ;
 	}
 	void computeFirst(string name){
 		NonTerminal* A = pool[name];
@@ -176,6 +178,10 @@ public:
 
    map<string , NonTerminal*> getPool(){
       return pool;
+   }
+
+   NonTerminal* getStart(){
+   	return startState;
    }
 
 };

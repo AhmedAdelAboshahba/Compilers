@@ -5,12 +5,23 @@
 #include <vector>
 #include <stack>
 #include <set>
-#include "llGrammar.cpp"
+
 
 
 
 class ParsingTable{
+private:
+    map<string, int> allTerminals;
+    map<string, int> nonTerminals;
+    map<string , vector<vector< Grammar* > > > myMap;
+    map<string , NonTerminal*> pool;
+    NonTerminal* startState;
 public:
+    ParsingTable(map<string , vector<vector< Grammar*> > > pro , map<string , NonTerminal*> p , NonTerminal* start){
+        myMap = pro;
+        pool =p;
+        startState =    start ;
+    }
     map<string, int> getTerminals(map<string, vector<vector<Grammar *>>> &myMap) {
         map<string, int> allTerminals;
         int index = 0;
@@ -57,7 +68,7 @@ public:
         }
     }
 
-    vector<vector<string>> initMap(map<string, vector<vector<Grammar *>>> myMap, map<string, NonTerminal *> pool) {
+    vector<vector<string>> initMap() {
         cout<<"fady"<<endl;
         for (map<string, vector<vector<Grammar *>>>::iterator it = myMap.begin(); it != myMap.end(); ++it) {
             cout << it->first << endl;
@@ -70,9 +81,7 @@ public:
         }
         cout<<"mark"<<endl;
         vector<vector<string>> parseTable;
-        map<string, int> allTerminals;
         allTerminals = getTerminals(myMap);
-        map<string, int> nonTerminals;
         int indexForNonTerminals = 0;
 
 
@@ -140,6 +149,16 @@ public:
         fillSynch(myMap,parseTable,nonTerminals,allTerminals,pool);
         return  parseTable;
     }
+    map<string, int> getTerminalIndex (){
+        return allTerminals;
+    }
+    map<string, int> getNonTerminalIndex (){
+        return nonTerminals;
+    }
+
+    NonTerminal* getStart(){
+    return startState;
+   }
 
 };
 

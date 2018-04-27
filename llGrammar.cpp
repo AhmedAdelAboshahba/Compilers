@@ -5,7 +5,7 @@
 #include <vector>
 #include <stack>
 #include <set>
-#include "Computations.cpp"
+
  
 using namespace std;
 
@@ -16,10 +16,12 @@ class LLGrammer{
 private:
     map< string , vector< vector < Grammar*> > >modified;
     map<string , NonTerminal*> pool;
+    NonTerminal* startState;
 public:
-     LLGrammer(map< string , vector< vector < Grammar*> > >mod , map<string , NonTerminal*> p){
+     LLGrammer(map< string , vector< vector < Grammar*> > >mod , map<string , NonTerminal*> p , NonTerminal* start ){
         modified=mod;
         pool = p;
+        startState = start;
     }
     void leftRecursion(){
        map< string , vector< vector < Grammar*> > >::iterator it;
@@ -63,9 +65,49 @@ public:
            }
        } 
     }
-    void LeftFactor(){
-    
+
+
+     void eliminate_Left_Recursion (){
+        map< string , vector< vector < Grammar*> > >::iterator itout,itin;
+
+        for(itout =modified.begin();itout!=modified.end();itout++){
+            for(itin=modified.begin();itin!=itout;itin++){
+                for(int i=0;i<(*itout).second.size();i++){
+                    for(int j=0;j<(*itout).second[i].size();j++){
+                        if((*itout).second[i][j]->getName() == (*itin).first){
+                          //cout<<i<<"  "<<j<<endl;
+                            (*itout).second[i].erase((*itout).second[i].begin()+j);
+                            vector<Grammar*> v1,v2;
+                            v1=v2=(*itout).second[i];
+                            (*itout).second.erase((*itout).second.begin()+i);
+                            for(int k=0;k<(*itin).second.size();k++){
+                                vector<Grammar*>::iterator beginit=v1.begin()+j;
+                                v1.insert(beginit,(*itin).second[k].begin(),(*itin).second[k].end());
+                                (*itout).second.push_back(v1);
+                                v1=v2;
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
     }
+
+    bool detectLeftFactor(){
+        map< string , vector< vector < Grammar*> > >::iterator it;
+        for(it =modified.begin();it!=modified.end();it++){
+            map<string ,int>maap;
+            for(int i=0;i<(*it).second.size();i++){
+                if(maap.find((*it).second[i][0]->getName()) == maap.end())
+                    maap[(*it).second[i][0]->getName()]=1;
+                else return true;
+            }
+        }
+        return false;
+    }
+
+
 
     map< string , vector< vector < Grammar*> > > getGrammar(){
       return modified;
@@ -88,7 +130,80 @@ public:
         cout <<"\n";
       }
    }
+
+
+   NonTerminal* getStart(){
+    return startState;
+   }
 };
+
+/*
+int main (){
+  Grammar* temp;
+  NonTerminal S("S");
+  NonTerminal A("A");
+  Terminal a("a");
+  Terminal b("b");
+  Terminal c("c");
+  Terminal d("d");
+  Terminal f("f");
+
+  S.setStart();
+  map<string , NonTerminal*> pool;
+  pool["S"] =&S;
+  pool["A"] =&A;
+  map<string , vector<vector< Grammar*> > > productions;
+  vector<vector< Grammar*> > rhs;
+  vector<Grammar*> v;
+
+
+
+  temp = (Grammar*) &A;
+  v.push_back(temp);
+  temp = (Grammar*) &a;
+  v.push_back(temp);
+  rhs.push_back(v);
+  v.clear();
+  temp=(Grammar*)&b;
+  v.push_back(temp);
+  rhs.push_back(v);
+  productions["S"] = rhs;
+
+  v.clear();
+  rhs.clear();
+
+  temp = (Grammar*) &A;
+  //v.push_back(temp);
+  temp = (Grammar*) &c;
+  v.push_back(temp);
+  rhs.push_back(v);
+  v.clear();
+  temp = (Grammar*) &a;
+  v.push_back(temp);
+  temp = (Grammar*) &S;
+  v.push_back(temp);
+  temp=(Grammar*)&d;
+  v.push_back(temp);
+  rhs.push_back(v);
+  v.clear();
+  temp = (Grammar*) &f;
+  v.push_back(temp);
+   rhs.push_back(v);
+  productions["A"] = rhs;
+
+ LLGrammer l(productions , pool);
+ l.printProductions();
+ l.eliminate_Left_Recursion();
+  l.printProductions();
+  /*Computations c(l.getGrammar() , l.getPool());
+  c.startComputation();
+  c.printFirst();
+  c.printFollow();
+  //c.printProductions();
+
+  return 0;
+}
+*/
 
 /*
 int main(){

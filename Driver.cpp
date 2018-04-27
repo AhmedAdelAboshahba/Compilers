@@ -1,5 +1,9 @@
-
+#include "Grammar.cpp"
+#include "Computations.cpp"
+#include "llGrammar.cpp"
 #include "ParseGrammar.cpp"
+#include "ParsingTable.cpp"
+#include "Matcher.cpp"
 
 int main(){
 
@@ -87,26 +91,36 @@ int main(){
 */
 
 
-  LLGrammer l(productions , pool);
+  LLGrammer l(productions , pool , &E);
   l.leftRecursion();
   //l.printProductions();
-  Computations c(l.getGrammar() , l.getPool());
+  Computations c(l.getGrammar() , l.getPool() , l.getStart());
   c.startComputation();
   c.printFirst();
   c.printFollow();
 
-  ParsingTable parser;
+  ParsingTable parser(c.getGrammar() , c.getPool() ,c.getStart());
  
 
-  vector<vector<string>> table =  parser.initMap(c.getGrammar() , c.getPool());
+  vector<vector<string>> table =  parser.initMap();
 
-
+/*
    for(int i=0; i<table.size(); i++){
         for(int j=0; j < table[i].size(); j++){
-            cout << table[i][j];
+        	if(table[i][j]==""){
+        		cout<<"error ";
+
+        	}
+        	else
+            cout << table[i][j] <<"  ";
         }
         cout << "\n";
     }
+    */
+
+
+    Matcher matcher(table , parser.getStart() ,parser.getNonTerminalIndex()  , parser.getTerminalIndex() ,  vector<string> {"+","id","+","id"});
+    matcher.startMatching();
 
 
   //c.printProductions();
